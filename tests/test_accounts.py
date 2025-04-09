@@ -35,6 +35,25 @@ class TestAccountsModel(unittest.TestCase):
         self.assertEqual(results[0]["provider_name"], "TestBank")
         self.assertAlmostEqual(results[0]["credit_limit"], 1234.56)
 
+    def test_get_returns_correct_account_by_id(self) -> None:
+        # Insert a test account with a known ID
+        self.conn.execute(
+            "INSERT INTO accounts (provider_name, credit_limit) VALUES (?, ?)",
+            ("TestGetBank", 987.65),
+        )
+        self.conn.commit()
+
+        result = self.model.get(1)
+        if result is None:
+            self.fail("Expected result to be a dict, got None")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["provider_name"], "TestGetBank")
+        self.assertAlmostEqual(result["credit_limit"], 987.65)
+
+    def test_get_returns_none_for_nonexistent_id(self) -> None:
+        result = self.model.get(9999)
+        self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()
