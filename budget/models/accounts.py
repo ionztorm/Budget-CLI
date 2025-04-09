@@ -31,7 +31,7 @@ class Accounts(Tables):
         super().__init__(conn, TableName.ACCOUNTS)
 
     @override
-    def get(self, id: int) -> None:
+    def get(self, id: int) -> dict | None:
         """
         Retrieve a single account by its ID.
 
@@ -41,7 +41,12 @@ class Accounts(Tables):
         Returns:
             None: To be implemented.
         """
-        pass
+        self._cursor.execute(
+            f"SELECT * FROM {self._table_name} WHERE id = ?",  # noqa: S608
+            (id,),
+        )
+        row = self._cursor.fetchone()
+        return self.row_to_dict(row) if row else None
 
     @override
     def get_all(self) -> list:

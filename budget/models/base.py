@@ -23,7 +23,7 @@ class Tables:
         self._cursor = self._conn.cursor()
         self._table_name = table_name.value
 
-    def get(self, id: int) -> None:
+    def get(self, id: int) -> dict | None:
         """
         Retrieve a single row by ID.
 
