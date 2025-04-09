@@ -10,7 +10,7 @@ from .constants import TableName
 
 
 class Tables:
-    def __init__(self, conn: sqlite3.Connection, table_name: str) -> None:
+    def __init__(self, conn: sqlite3.Connection, table_name: TableName) -> None:
         """
         Initialise the table with a database connection.
 
@@ -19,9 +19,9 @@ class Tables:
         """
         if not isinstance(table_name, TableName):
             raise TypeError("Expected table_name to be a TableName enum")
-        self.conn = conn
-        self.cursor = self.conn.cursor()
-        self.table_name = table_name
+        self._conn = conn
+        self._cursor = self._conn.cursor()
+        self._table_name = table_name.value
 
     def get(self, id: int) -> None:
         """
@@ -32,7 +32,7 @@ class Tables:
         """
         raise NotImplementedError
 
-    def get_all(self) -> None:
+    def get_all(self) -> list:
         """Retrieve all rows from the table."""
         raise NotImplementedError
 
@@ -77,7 +77,7 @@ class Tables:
         """
         return dict(
             zip(
-                [column[0] for column in self.cursor.description],
+                [column[0] for column in self._cursor.description],
                 row,
                 strict=False,
             )
@@ -93,11 +93,11 @@ class Tables:
         Returns:
             bool: True if the record exists, False otherwise.
         """
-        self.cursor.execute(
-            f"SELECT 1 FROM {self.table_name} WHERE id = ?",  # noqa: S608
+        self._cursor.execute(
+            f"SELECT 1 FROM {self._table_name} WHERE id = ?",  # noqa: S608
             (id,),
         )
-        return self.cursor.fetchone() is not None
+        return self._cursor.fetchone() is not None
 
     def count(self) -> int:
         """
@@ -106,5 +106,6 @@ class Tables:
         Returns:
             int: The total number of records.
         """
-        self.cursor.execute(f"SELECT COUNT(*) FROM {self.table_name}")  # noqa: S608
-        return self.cursor.fetchone()[0]
+        self._cursor.execute(f"SELECT COUNT(*) FROM {self._table_name}")  # noqa: S608
+
+        return self._cursor.fetchone()[0]
