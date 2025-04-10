@@ -54,6 +54,23 @@ class TestAccountsModel(unittest.TestCase):
         result = self.model.get(9999)
         self.assertIsNone(result)
 
+    def test_add_inserts_account_successfully(self) -> None:
+        data = {
+            "provider_name": "AddedBank",
+            "credit_limit": 2500.0,
+            "statement_date": "2025-05-01",
+            "start_date": "2025-01-01",
+            "opening_balance": 0.0,
+            "interest_rate": 19.99,
+        }
+
+        self.model.add(data)
+
+        results = self.model.get_all()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["provider_name"], "AddedBank")
+        self.assertAlmostEqual(results[0]["credit_limit"], 2500.0)
+
 
 if __name__ == "__main__":
     unittest.main()
