@@ -100,10 +100,26 @@ class Accounts(Tables):
         Returns:
             None: To be implemented.
         """
-        pass
+        if not self.exists(id):
+            return
+
+        self._cursor.execute(f"PRAGMA table_info({self._table_name})")
+        valid_columns = [
+            row[1] for row in self._cursor.fetchall() if row[1] != "id"
+        ]
+
+        update_columns = [col for col in data.keys() if col in valid_columns]
+        assignments = ", ".join(f"{col} = ?" for col in update_columns)
+        values = tuple(data[col] for col in update_columns)
+
+        self._cursor.execute(
+            f"UPDATE {self._table_name} SET {assignments} WHERE id = ?",  # noqa: S608
+            (*values, id),
+        )
+        self._conn.commit()
 
     @override
-    def delete(self, id: int) -> None:
+    def delete(self, id: int) -> bool:
         """
         Delete an account from the database by ID.
 
@@ -113,4 +129,12 @@ class Accounts(Tables):
         Returns:
             None: To be implemented.
         """
-        pass
+        if not self.exists(id):
+            return False
+
+        self._cursor.execute(
+            f"DELETE FROM {self._table_name} WHERE id = ?",  # noqa: S608
+            (id,),
+        )
+        self._conn.commit()
+        return True
