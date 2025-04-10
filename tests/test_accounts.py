@@ -71,6 +71,57 @@ class TestAccountsModel(unittest.TestCase):
         self.assertEqual(results[0]["provider_name"], "AddedBank")
         self.assertAlmostEqual(results[0]["credit_limit"], 2500.0)
 
+    def test_edit_updates_account_fields(self) -> None:
+        # Step 1: Insert an account
+        self.model.add(
+            {
+                "provider_name": "EditBank",
+                "credit_limit": 1000.0,
+                "statement_date": "2025-06-01",
+                "start_date": "2025-01-01",
+                "opening_balance": 500.0,
+                "interest_rate": 15.0,
+            }
+        )
+
+        # Step 2: Edit the account with ID 1
+        self.model.edit(
+            1,
+            {
+                "provider_name": "UpdatedBank",
+                "credit_limit": 3000.0,
+            },
+        )
+
+        # Step 3: Fetch and check updated fields
+        result = self.model.get(1)
+        if result is None:
+            self.fail("Expected result to be a dict, got None")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["provider_name"], "UpdatedBank")
+        self.assertAlmostEqual(result["credit_limit"], 3000.0)
+
+    def test_delete_removes_account(self) -> None:
+        # Insert an account
+        self.model.add(
+            {
+                "provider_name": "DeleteBank",
+                "credit_limit": 1500.0,
+                "statement_date": "2025-07-01",
+                "start_date": "2025-02-01",
+                "opening_balance": 200.0,
+                "interest_rate": 17.5,
+            }
+        )
+
+        # Delete it
+        result = self.model.delete(1)
+        self.assertTrue(result)
+
+        # Verify it's gone
+        self.assertIsNone(self.model.get(1))
+
 
 if __name__ == "__main__":
     unittest.main()
