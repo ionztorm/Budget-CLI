@@ -6,22 +6,23 @@ Subclasses must implement standard CRUD operations.
 
 import sqlite3
 
-from .constants import TableName
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from budget.models.constants import TableName
 
 
 class Tables:
-    def __init__(self, conn: sqlite3.Connection, table_name: TableName) -> None:
+    def __init__(self, conn: sqlite3.Connection) -> None:
         """
         Initialise the table with a database connection.
 
         Args:
             conn (sqlite3.Connection): An active SQLite connection.
         """
-        if not isinstance(table_name, TableName):
-            raise TypeError("Expected table_name to be a TableName enum")
         self._conn = conn
         self._cursor = self._conn.cursor()
-        self._table_name = table_name.value
+        self._table_name: TableName
 
     def get(self, id: int) -> dict | None:
         """

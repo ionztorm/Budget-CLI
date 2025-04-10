@@ -1,8 +1,3 @@
-from enum import Enum
+from typing import Literal
 
-
-class TableName(Enum):
-    ACCOUNTS = "accounts"
-    BILLS = "bills"
-    SUBSCRIPTIONS = "subscriptions"
-    TRANSACTIONS = "transactions"
+TableName = Literal["accounts", "bills", "subscriptions", "transactions"]
