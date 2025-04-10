@@ -9,10 +9,12 @@ inserting new data, editing existing entries, and deleting rows.
 
 import sqlite3
 
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from budget.models.base import Tables
-from budget.models.constants import TableName
+
+if TYPE_CHECKING:
+    from budget.models.constants import TableName
 
 
 class Accounts(Tables):
@@ -28,7 +30,8 @@ class Accounts(Tables):
         Args:
             conn (sqlite3.Connection): An active SQLite connection.
         """
-        super().__init__(conn, TableName.ACCOUNTS)
+        super().__init__(conn)
+        self._table_name: TableName = "accounts"
 
     @override
     def get(self, id: int) -> dict | None:
@@ -71,7 +74,19 @@ class Accounts(Tables):
         Returns:
             None: To be implemented.
         """
-        pass
+        self._cursor.execute(f"PRAGMA table_info({self._table_name})")
+        columns = [row[1] for row in self._cursor.fetchall() if row[1] != "id"]
+
+        placeholders = ", ".join("?" for _ in columns)
+        col_list = ", ".join(columns)
+        values = tuple(data.get(col) for col in columns)
+
+        self._cursor.execute(
+            f"INSERT INTO {self._table_name} "  # noqa: S608
+            f"({col_list}) VALUES ({placeholders})",
+            values,
+        )
+        self._conn.commit()
 
     @override
     def edit(self, id: int, data: dict) -> None:
